@@ -1,0 +1,139 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>TMMIN Warranty App — Quiz & Spinwheel</title>
+  <link rel="stylesheet" href="styles.css" />
+  <script defer src="https://unpkg.com/@supabase/supabase-js@2"></script>
+</head>
+<body>
+  <div class="container">
+    <header class="topbar">
+      <div>
+        <h1 class="title">TMMIN Warranty App</h1>
+        <p class="subtitle">Form Quiz, Admin Rekap, dan Spinwheel Hadiah</p>
+      </div>
+      <nav class="nav">
+        <a href="#/fill"   class="btn"          id="nav-fill">Form</a>
+        <a href="#/admin"  class="btn primary"  id="nav-admin">Admin</a>
+        <!-- <a href="#/wheel"  class="btn primary"  id="nav-wheel">Wheel</a> -->
+      </nav>
+    </header>
+
+    <main>
+      <!-- ROUTE: FORM QUIZ -->
+      <section id="route-fill" class="route">
+        <form id="quiz-form" class="card form">
+          <div class="grid-2">
+            <label class="field">
+              <span class="label">Nama <span class="req">*</span></span>
+              <input required name="name" type="text" placeholder="Nama lengkap" />
+            </label>
+            <label class="field">
+              <span class="label">No Reg <span class="req">*</span></span>
+              <input required name="reg_no" type="text" placeholder="Nomor registrasi" />
+            </label>
+          </div>
+          <fieldset class="fieldset"><legend>1) Which areas does TMMIN warranty cover?</legend>
+            <label class="opt"><input type="radio" name="q1" value="Domestic" required /> Domestic</label>
+            <label class="opt"><input type="radio" name="q1" value="Oversea" /> Oversea</label>
+            <label class="opt"><input type="radio" name="q1" value="Domestic & Oversea" /> Domestic&Oversea</label>
+          </fieldset>
+          <fieldset class="fieldset"><legend>2) During what periods can the warranty be claimed?</legend>
+            <label class="opt"><input type="radio" name="q2" value="3 Years / 100.000 Km" required /> 3Years/100.000Km</label>
+            <label class="opt"><input type="radio" name="q2" value="3 Years / 10.000 Km" /> 3Years/10.000Km</label>
+            <label class="opt"><input type="radio" name="q2" value="3 Years / 1.000 Km" /> 3Years/1.000Km</label>
+          </fieldset>
+          <fieldset class="fieldset"><legend>3) What are the aspects of a warranty claim?</legend>
+            <label class="opt"><input type="radio" name="q3" value="Labor+Sublet+Part+Tax" required /> Labor+Sublet+Part+Tax</label>
+            <label class="opt"><input type="radio" name="q3" value="Labor+Sublet+Part+Handling" /> Labor+Sublet+Part+Handling</label>
+            <label class="opt"><input type="radio" name="q3" value="Fix+Sublet+Part+Handling" /> Fix+Sublet+Part+Handling</label>
+          </fieldset>
+          <div class="actions"><p id="status" class="status"></p><button type="submit" class="btn primary">Submit</button></div>
+        </form>
+        <div id="result" class="card hidden"><h2 class="card-title">Result</h2><p id="result-text"></p></div>
+      </section>
+
+      <!-- ROUTE: ADMIN -->
+      <section id="route-admin" class="route hidden">
+        <div id="admin-login" class="card form small">
+          <h2 class="card-title">Admin Login</h2>
+          <form id="admin-login-form" class="space-y">
+            <label class="field"><span class="label">Email</span><input name="email" type="email" required placeholder="admin@example.com" /></label>
+            <label class="field"><span class="label">Password</span><input name="password" type="password" required placeholder="••••••••" /></label>
+            <div class="actions"><p id="admin-status" class="status"></p><button class="btn primary" type="submit">Sign in</button></div>
+          </form>
+        </div>
+
+        <div id="admin-panel" class="hidden space-y">
+          <div class="toolbar">
+            <div class="l"><input id="search" type="text" placeholder="Cari nama / No Reg" /><button id="exportCsv" class="btn">Export CSV</button></div>
+            <div class="r"><span id="sessionTimer" class="muted"></span><button id="signOut" class="btn danger">Sign out</button></div>
+          </div>
+          <div class="table-wrap card">
+            <table class="table"><thead><tr><th>Created</th><th>Nama</th><th>No Reg</th><th>Q1</th><th>Q2</th><th>Q3</th><th>Score</th></tr></thead><tbody id="rows"></tbody></table>
+          </div>
+
+          <h3 class="mt">History Spinwheel</h3>
+          <div class="table-wrap card">
+            <table class="table"><thead><tr><th>Waktu</th><th>Nama</th><th>No Reg</th><th>Prize</th></tr></thead><tbody id="rowsSpin"></tbody></table>
+          </div>
+        </div>
+      </section>
+
+      <!-- ROUTE: WHEEL -->
+      <section id="route-wheel" class="route hidden">
+        <div class="grid">
+          <div class="stage">
+            <div class="pointer"></div>
+            <canvas id="wheel" width="520" height="520"></canvas>
+          </div>
+          <aside class="panel card">
+            <h2>Spinwheel</h2>
+
+            <!-- Ganti form input jadi readonly display -->
+            <div class="space-y">
+                <div class="field">
+                <span class="label">Nama</span>
+                <div id="disp_name" class="readonly"></div>
+                </div>
+                <div class="field">
+                <span class="label">No Reg</span>
+                <div id="disp_reg" class="readonly"></div>
+                </div>
+            </div>
+
+            <ul class="legend">
+              <li><span class="swatch pen"></span> Pen</li>
+              <li><span class="swatch sticky"></span> Sticky Note</li>
+              <li><span class="swatch key"></span> Key Wallet</li>
+              <li><span class="swatch tumbler"></span> Tumbler</li>
+              <li><span class="swatch snack"></span> Snack</li>
+            </ul>
+
+            <div class="controls">
+                <button id="spinBtn" class="btn primary" disabled>SPIN</button>
+                <!-- <button id="refreshInv" class="btn">Refresh Stok</button> -->
+            </div>
+
+            <p id="wheelStatus" class="muted" aria-live="polite"></p>
+            <div id="wheelResult" class="result"></div>
+            <div class="inventory" id="inv"></div>
+          </aside>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <script defer src="app.js"></script>
+  <!-- Modal Result -->
+    <div id="winModal" class="modal">
+    <div class="box">
+        <h3>Selamat! 🎉</h3>
+        <div id="winPrize" class="prize">Pen</div>
+        <button id="closeWin" class="btn primary close">Tutup</button>
+    </div>
+</div>
+</body>
+</html>
