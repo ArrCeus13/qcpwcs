@@ -617,25 +617,10 @@ function sleep(ms) {
 }
 
 async function isEligible(regNo){
-  // normalisasi input HP (spasi variasi, unicode, dll)
-  const norm = (regNo || '')
-    .normalize('NFKC')        // samakan bentuk unicode
-    .trim()                   // buang spasi pinggir
-    .replace(/\s+/g,'')       // buang semua spasi di dalam
-    .toLowerCase();           // samakan casing
-
-  const { data, error } = await supabase
-    .from('tmmin_quiz_submissions')
-    .select('score')
-    // cari case-insensitive persis (tanpa % → exact match tapi ignore case)
-    .ilike('reg_no', norm)
-    .order('created_at', { ascending: false })
-    .limit(1)
-    .maybeSingle();
-
+  const { data, error } = await supabase.rpc('is_eligible', { p_reg_no: regNo });
   if (error) {
-    console.warn('eligibility error', error);
+    console.warn('eligibility rpc error', error);
     return false;
   }
-  return !!data && Number(data.score) === 3;
+  return !!data; // boolean dari fungsi
 }
