@@ -487,7 +487,8 @@ function animateSpinTo(total) {
 async function refreshInventory(){
   const { data } = await supabase.from('spin_inventory').select('prize,remaining');
   if (data) for (const r of data) inventory[r.prize] = r.remaining;
-  invEl.textContent = `Tumbler: ${fmt('tumbler')} | Key Wallet: ${fmt('key')} | Snack: ${fmt('snack')}`;
+  // invEl.textContent = `Tumbler: ${fmt('tumbler')} | Key Wallet: ${fmt('key')} | Snack: ${fmt('snack')}`;
+  invEl.textContent = '';
   drawWheel();
   function fmt(k){ const v = inventory[k]; return v===Infinity?'∞':v; }
 }
@@ -624,3 +625,4 @@ async function isEligible(regNo){
   }
   return !!data; // boolean dari fungsi
 }
+
